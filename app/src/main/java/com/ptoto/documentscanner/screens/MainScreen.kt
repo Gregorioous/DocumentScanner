@@ -1,5 +1,6 @@
 package com.ptoto.documentscanner.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -11,9 +12,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.ptoto.documentscanner.R
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
+
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -34,6 +37,6 @@ fun MainScreen() {
             )
         }
     ) {
-        TODO("Потом допишу)")
+
     }
 }
