@@ -5,7 +5,7 @@
 
     <style name="MySplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/document_scanner_svgrepo_com</item>
-        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenBackground">@color/black</item>
         <item name="postSplashScreenTheme">@style/Theme.DocumentScanner</item>
     </style>
 </resources>
