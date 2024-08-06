@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <paths>
+        <file-patch
+            name="files"
+            patch="." />
+        <cache-patch
+            name="mlkit_docscan_ui_client"
+            path="." />
+    </paths>
+
+</resources>
