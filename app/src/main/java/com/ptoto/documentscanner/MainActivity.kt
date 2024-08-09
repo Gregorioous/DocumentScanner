@@ -28,8 +28,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             splashScreen.setKeepOnScreenCondition { pdfViewModel.isSplashScreen }
-            DocumentScannerTheme {
-                MainScreen(pdfViewModel)
+            DocumentScannerTheme(pdfViewModel.isDarkMode, false) {
+                MainScreen(
+                    pdfViewModel,
+                    pdfViewModel.isDarkMode,
+                    onThemeUpdated = { pdfViewModel.toggleDarkMode() }
+                )
             }
         }
     }

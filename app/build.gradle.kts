@@ -74,5 +74,6 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.material.icons.extended)
 
 }

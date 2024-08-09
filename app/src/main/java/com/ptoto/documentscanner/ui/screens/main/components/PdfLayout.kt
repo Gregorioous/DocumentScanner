@@ -30,6 +30,7 @@ import com.ptoto.documentscanner.R
 import com.ptoto.documentscanner.data.models.PdfEntity
 import com.ptoto.documentscanner.ui.viewmodels.PdfViewModel
 import com.ptoto.documentscanner.utills.getFileUri
+import java.text.SimpleDateFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +43,7 @@ fun PdfLayout(pdfEntity: PdfEntity, pdfViewModel: PdfViewModel) {
             .wrapContentWidth()
             .padding(10.dp),
         onClick = {
-            val getFileUri = getFileUri(context, pdfEntity.name)
+            val getFileUri = context.getFileUri(pdfEntity.name)
             val browserIntent = Intent(Intent.ACTION_VIEW, getFileUri)
             browserIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             activity.startActivity(browserIntent)
@@ -64,7 +65,7 @@ fun PdfLayout(pdfEntity: PdfEntity, pdfViewModel: PdfViewModel) {
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = pdfEntity.name,
+                    text = "Title: ${pdfEntity.name}",
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -72,6 +73,15 @@ fun PdfLayout(pdfEntity: PdfEntity, pdfViewModel: PdfViewModel) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Size: ${pdfEntity.size}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Date: ${
+                        SimpleDateFormat(
+                            "dd-MMM-YYYY- HH:mm:ss ",
+                            java.util.Locale.getDefault()
+                        ).format(pdfEntity.lastModifiedTime)
+                    }",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

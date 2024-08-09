@@ -11,12 +11,19 @@ fun Context.showToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 }
 
-fun copyPdfFileToAppDirectory(context: Context, pdfUri: Uri, destinationFileName: String) {
-    val inputStream = context.contentResolver.openInputStream(pdfUri)
-    val outputFile = File(context.filesDir, destinationFileName)
-    FileOutputStream(outputFile).use {
-        inputStream?.copyTo(it)
+fun Context.copyPdfFileToAppDirectory(pdfUri: Uri, destinationFileName: String) {
+    val outputFile = File(filesDir, destinationFileName)
+    contentResolver.openInputStream(pdfUri)?.use { inputStream ->
+        FileOutputStream(outputFile).use { outputStream ->
+            inputStream.copyTo(outputStream)
+        }
     }
+}
+
+fun Context.getFileSize(fileName: String): String {
+    val file = File(filesDir, fileName)
+    val fileSizeBytes = file.length()
+    return formatFileSize(fileSizeBytes)
 }
 
 fun Context.renameFile(oldFileName: String, newFileName: String) {
@@ -25,13 +32,26 @@ fun Context.renameFile(oldFileName: String, newFileName: String) {
     oldFile.renameTo(newFile)
 }
 
-
 fun Context.deleteFele(fileName: String): Boolean {
     val file = File(filesDir, fileName)
     return file.deleteRecursively()
 }
 
-fun getFileUri(context: Context, fileName: String): Uri {
-    val file = File(context.filesDir, fileName)
-    return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+fun Context.getFileUri(fileName: String): Uri {
+    val file = File(filesDir, fileName)
+    return FileProvider.getUriForFile(this, "${packageName}.provider", file)
+}
+
+
+private fun formatFileSize(sizeInBytes: Long): String {
+    val kiloBytes = sizeInBytes / 1024
+    val megaBytes = kiloBytes / 1024
+    val gigaBytes = megaBytes / 1024
+
+    return when {
+        gigaBytes > 0 -> "$gigaBytes GB"
+        megaBytes > 0 -> "$megaBytes MB"
+        kiloBytes > 0 -> "$kiloBytes KB"
+        else -> "$sizeInBytes B"
+    }
 }

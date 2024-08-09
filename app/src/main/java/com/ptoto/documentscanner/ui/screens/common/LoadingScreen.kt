@@ -8,12 +8,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.ptoto.documentscanner.ui.viewmodels.PdfViewModel
 
 @Composable
 fun LoadingScreen(pdfViewModel: PdfViewModel) {
     if (pdfViewModel.loadingDialog) {
-        Dialog(onDismissRequest = { pdfViewModel.loadingDialog = false }) {
+        Dialog(
+            onDismissRequest = { pdfViewModel.loadingDialog = false },
+            properties = DialogProperties(false, false)
+        ) {
 
             Box(
                 modifier = Modifier
