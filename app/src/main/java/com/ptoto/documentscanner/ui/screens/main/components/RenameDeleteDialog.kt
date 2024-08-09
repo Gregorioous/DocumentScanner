@@ -1,5 +1,7 @@
 package com.ptoto.documentscanner.ui.screens.main.components
 
+import android.content.ClipData
+import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +30,7 @@ import androidx.compose.ui.window.Dialog
 import com.ptoto.documentscanner.R
 import com.ptoto.documentscanner.ui.viewmodels.PdfViewModel
 import com.ptoto.documentscanner.utills.deleteFele
+import com.ptoto.documentscanner.utills.getFileUri
 import com.ptoto.documentscanner.utills.renameFile
 import com.ptoto.documentscanner.utills.showToast
 import java.util.Date
@@ -48,7 +51,7 @@ fun RenameDeleteDialog(pdfViewModel: PdfViewModel) {
                 shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surface
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -74,6 +77,25 @@ fun RenameDeleteDialog(pdfViewModel: PdfViewModel) {
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_delete_24),
+                                contentDescription = null,
+                                tint = Color.Blue
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(onClick = {
+                            pdfViewModel.currentPdfEntity?.let {
+                                pdfViewModel.showRenameDialog = false
+                                val getFileUri = context.getFileUri(it.name)
+                                val shareIntent = Intent(Intent.ACTION_SEND)
+                                shareIntent.type = "application/pdf"
+                                shareIntent.clipData = ClipData.newRawUri("", getFileUri)
+                                shareIntent.putExtra(Intent.EXTRA_STREAM, getFileUri)
+                                shareIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                context.startActivity(Intent.createChooser(shareIntent, "Share"))
+                            }
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_share_24),
                                 contentDescription = null,
                                 tint = Color.Blue
                             )

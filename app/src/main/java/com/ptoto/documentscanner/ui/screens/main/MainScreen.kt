@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -34,8 +35,11 @@ import com.ptoto.documentscanner.ui.screens.common.ErrorScreen
 import com.ptoto.documentscanner.ui.screens.common.LoadingScreen
 import com.ptoto.documentscanner.ui.screens.main.components.PdfLayout
 import com.ptoto.documentscanner.ui.screens.main.components.RenameDeleteDialog
+import com.ptoto.documentscanner.ui.screens.main.components.ThemeSwitcher
 import com.ptoto.documentscanner.ui.viewmodels.PdfViewModel
+import com.ptoto.documentscanner.utills.Resource
 import com.ptoto.documentscanner.utills.copyPdfFileToAppDirectory
+import com.ptoto.documentscanner.utills.getFileSize
 import com.ptoto.documentscanner.utills.showToast
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -45,7 +49,7 @@ import java.util.UUID
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(pdfViewModel: PdfViewModel) {
+fun MainScreen(pdfViewModel: PdfViewModel, darkTheme: Boolean, onThemeUpdated: () -> Unit) {
 
     LoadingScreen(pdfViewModel = pdfViewModel)
     RenameDeleteDialog(pdfViewModel = pdfViewModel)
@@ -53,8 +57,27 @@ fun MainScreen(pdfViewModel: PdfViewModel) {
 
     val context = LocalContext.current
 
-    val pdfList by pdfViewModel.pdfStateFlow.collectAsState()
+    val pdfState by pdfViewModel.pdfStateFlow.collectAsState()
 
+    val message = pdfViewModel.message
+
+    LaunchedEffect(Unit) {
+        message.collect {
+            when (it) {
+                is Resource.Success -> {
+                    context.showToast(it.data)
+                }
+
+                is Resource.Error -> {
+                    context.showToast(it.message)
+                }
+
+                Resource.Idle -> {}
+                Resource.Loading -> {}
+
+            }
+        }
+    }
 
 
     val scannerLauncher =
@@ -76,13 +99,17 @@ fun MainScreen(pdfViewModel: PdfViewModel) {
                         Locale.getDefault()
                     ).format(date) + ".pdf"
 
-                    copyPdfFileToAppDirectory(
-                        context,
+                    context.copyPdfFileToAppDirectory(
                         pdf.uri,
                         filename
                     )
 
-                    val pdfEntity = PdfEntity(UUID.randomUUID().toString(), filename, "10 KB", date)
+                    val pdfEntity = PdfEntity(
+                        UUID.randomUUID().toString(),
+                        filename,
+                        context.getFileSize(filename),
+                        date
+                    )
                     pdfViewModel.insertPdf(
                         pdfEntity
                     )
@@ -103,6 +130,11 @@ fun MainScreen(pdfViewModel: PdfViewModel) {
         topBar = {
             TopAppBar(title = {
                 Text(text = stringResource(id = R.string.app_name))
+            }, actions = {
+                ThemeSwitcher(
+                    darkTheme = darkTheme,
+                    onClick = onThemeUpdated
+                )
             })
         },
         floatingActionButton = {
@@ -126,21 +158,36 @@ fun MainScreen(pdfViewModel: PdfViewModel) {
             )
         }
     ) { paddingValues ->
-        if (pdfList.isEmpty()) {
-            ErrorScreen(message = "No Pdf")
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
+        pdfState.DisplayResult(
+            onLoading = {
+                /* Box(
+                     modifier = Modifier
+                         .fillMaxSize(),
+                     contentAlignment = Alignment.Center
+                 ) {
+                     CircularProgressIndicator()
+                 }*/
+            },
+            onSuccess = { pdfList ->
+                if (pdfList.isEmpty()) {
+                    ErrorScreen(message = "No Pdf")
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    ) {
 
-                items(items = pdfList, key = { pdfEntity: PdfEntity ->
-                    pdfEntity.id
-                }) { pdfEntity ->
-                    PdfLayout(pdfEntity = pdfEntity, pdfViewModel = pdfViewModel)
+                        items(items = pdfList, key = { pdfEntity: PdfEntity ->
+                            pdfEntity.id
+                        }) { pdfEntity ->
+                            PdfLayout(pdfEntity = pdfEntity, pdfViewModel = pdfViewModel)
+                        }
+                    }
                 }
-            }
-        }
+            },
+            onError = {
+                ErrorScreen(message = it)
+            })
     }
 }
